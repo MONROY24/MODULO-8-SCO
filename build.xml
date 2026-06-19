@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ============================================================
+     MÓDULO 8 – Análisis Predictivo con IA
+     Archivo de construcción Apache Ant
+     Uso:
+       ant compile   → Compila las clases
+       ant run       → Ejecuta el módulo
+       ant jar       → Empaqueta en modulo8-ia.jar
+       ant clean     → Limpia los archivos generados
+     ============================================================ -->
+<project name="Modulo8IA" default="compile" basedir=".">
+
+    <!-- ── Propiedades ──────────────────────────────────────────────────────── -->
+    <property name="src.dir"     value="src/main/java"/>
+    <property name="config.dir"  value="config"/>
+    <property name="build.dir"   value="build/classes"/>
+    <property name="jar.dir"     value="build"/>
+    <property name="jar.file"    value="${jar.dir}/modulo8-ia.jar"/>
+    <property name="lib.dir"     value="lib"/>
+    <property name="main.class"  value="com.sistemacontable.modulo8.Main"/>
+
+    <!-- ── Classpath: driver JDBC + clases compiladas ───────────────────────── -->
+    <path id="classpath">
+        <fileset dir="${lib.dir}" includes="*.jar"/>
+        <pathelement location="${build.dir}"/>
+    </path>
+
+    <!-- ── Crear directorios necesarios ─────────────────────────────────────── -->
+    <target name="init" description="Crea los directorios de salida">
+        <mkdir dir="${build.dir}"/>
+        <mkdir dir="${lib.dir}"/>
+        <mkdir dir="${jar.dir}"/>
+        <echo>✔ Directorios preparados</echo>
+    </target>
+
+    <!-- ── Compilar ──────────────────────────────────────────────────────────── -->
+    <target name="compile" depends="init" description="Compila el código fuente">
+        <javac srcdir="${src.dir}"
+               destdir="${build.dir}"
+               classpathref="classpath"
+               source="17" target="17"
+               encoding="UTF-8"
+               includeantruntime="false">
+            <compilerarg value="-Xlint:unchecked"/>
+        </javac>
+
+        <!-- Copiar config/db.properties al classpath para que AppConfig lo lea -->
+        <copy todir="${build.dir}" failonerror="false">
+            <fileset dir="${config.dir}" includes="*.properties"/>
+        </copy>
+
+        <echo>✔ Compilación exitosa</echo>
+    </target>
+
+    <!-- ── Ejecutar ──────────────────────────────────────────────────────────── -->
+    <target name="run" depends="compile" description="Ejecuta el módulo">
+        <java classname="${main.class}" fork="true">
+            <classpath refid="classpath"/>
+            <jvmarg value="-Dfile.encoding=UTF-8"/>
+        </java>
+    </target>
+
+    <!-- ── Empaquetar en JAR ejecutable ──────────────────────────────────────── -->
+    <target name="jar" depends="compile" description="Genera el JAR ejecutable">
+        <jar destfile="${jar.file}" basedir="${build.dir}">
+            <manifest>
+                <attribute name="Main-Class"       value="${main.class}"/>
+                <attribute name="Class-Path"       value="."/>
+                <attribute name="Implementation-Title"   value="Modulo8-IA"/>
+                <attribute name="Implementation-Version" value="1.0.0"/>
+            </manifest>
+            <!-- Incluir db.properties dentro del JAR -->
+            <fileset dir="${config.dir}" includes="*.properties"/>
+        </jar>
+        <echo>✔ JAR generado en ${jar.file}</echo>
+    </target>
+
+    <!-- ── Limpiar ───────────────────────────────────────────────────────────── -->
+    <target name="clean" description="Elimina los artefactos generados">
+        <delete dir="build"/>
+        <echo>✔ Limpieza completada</echo>
+    </target>
+
+    <!-- ── Todo: limpiar + compilar + jar ────────────────────────────────────── -->
+    <target name="all" depends="clean, jar" description="Reconstrucción completa"/>
+
+</project>

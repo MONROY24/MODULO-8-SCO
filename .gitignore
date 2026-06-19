@@ -1,0 +1,27 @@
+# ── Compilación y artefactos ────────────────────────────────────────────────
+build/
+*.class
+*.jar
+!lib/*.jar
+
+# ── IDEs ─────────────────────────────────────────────────────────────────────
+.idea/
+*.iml
+.eclipse/
+.project
+.classpath
+.settings/
+nbproject/
+nb-configuration.xml
+
+# ── Sistema Operativo ─────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Logs ─────────────────────────────────────────────────────────────────────
+*.log
+
+# ── Configuración local (¡nunca versionar credenciales!) ─────────────────────
+# Si quieres versionar config/, excluye solo el archivo de producción:
+# config/db.properties

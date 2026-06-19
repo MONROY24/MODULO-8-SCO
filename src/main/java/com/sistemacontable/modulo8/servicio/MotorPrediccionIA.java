@@ -5,6 +5,7 @@ import com.sistemacontable.modulo8.modelo.ResultadoPrediccion;
 
 import java.util.List;
 import java.util.Random;
+import java.util.logging.Logger;
 
 /**
  * MÓDULO 8 – Análisis Predictivo con IA
@@ -23,13 +24,15 @@ import java.util.Random;
  */
 public class MotorPrediccionIA {
 
+    private static final Logger LOGGER = Logger.getLogger(MotorPrediccionIA.class.getName());
+
     // ── Hiperparámetros ───────────────────────────────────────────────────────
     private static final int    INPUT_SIZE        = 3;
     private static final int    HIDDEN1_SIZE      = 8;
     private static final int    HIDDEN2_SIZE      = 4;
     private static final int    OUTPUT_SIZE       = 2;
     private static final int    EPOCAS            = 5000;
-    private static final double TASA_APRENDIZAJE  = 0.05;
+    private static final double TASA_APRENDIZAJE_INICIAL = 0.05;
 
     /** Intervalo de épocas para imprimir el error (0 = sin log). */
     private static final int    LOG_INTERVALO     = 1000;
@@ -108,18 +111,32 @@ public class MotorPrediccionIA {
         double[][] X = preprocesador.matrizEntrada(historial);
         double[][] Y = preprocesador.matrizSalida(historial);
 
+        double tasaAprendizajeActual = TASA_APRENDIZAJE_INICIAL;
+
         // 3. Entrenamiento con log del error cada LOG_INTERVALO épocas
         for (int epoca = 0; epoca < EPOCAS; epoca++) {
+            if (Thread.currentThread().isInterrupted()) {
+                throw new IllegalStateException("Análisis cancelado por el usuario.");
+            }
+
+            // Learning Rate Decay: reducir la tasa de aprendizaje un 10% cada 1000 épocas
+            // para evitar oscilaciones y permitir que la red converja de forma más estable.
+            if (epoca > 0 && epoca % 1000 == 0) {
+                tasaAprendizajeActual *= 0.90;
+            }
+
             for (int i = 0; i < X.length; i++) {
-                entrenarMuestra(X[i], Y[i]);
+                entrenarMuestra(X[i], Y[i], tasaAprendizajeActual);
             }
 
             if (LOG_INTERVALO > 0 && (epoca + 1) % LOG_INTERVALO == 0) {
                 double mse = calcularMSE(X, Y);
-                System.out.printf("[MotorIA] Época %d/%d → MSE: %.6f%n",
-                        epoca + 1, EPOCAS, mse);
+                LOGGER.info(String.format("Época %d/%d → MSE: %.6f", epoca + 1, EPOCAS, mse));
             }
         }
+
+        // 3.5. Obtener el MSE final para medir la calidad del ajuste
+        double mseFinal = calcularMSE(X, Y);
 
         // 4. Inferencia: predecir el mes siguiente
         double[] vectorPrediccion = preprocesador.vectorUltimoMes(historial);
@@ -140,13 +157,13 @@ public class MotorPrediccionIA {
         resultado.setComprasPredichas   (Math.max(0, comprasPred));
         resultado.setTendenciaPorcentaje(tendencia);
         resultado.setClasificacionTendencia(clasificarTendencia(tendencia));
-        resultado.setNivelConfianza     (calcularConfianza(historial.size()));
+        resultado.setNivelConfianza     (calcularConfianza(historial.size(), mseFinal));
         resultado.setHistorial          (historial);
         resultado.setTiempoEntrenamientoMs(System.currentTimeMillis() - inicio);
 
         long tiempoTotal = System.currentTimeMillis() - inicio;
-        System.out.printf("[MotorIA] Predicción completada en %d ms → Ventas: $%.2f | Compras: $%.2f%n",
-                tiempoTotal, ventasPred, comprasPred);
+        LOGGER.info(String.format("Predicción completada en %d ms → Ventas: $%.2f | Compras: $%.2f",
+                tiempoTotal, ventasPred, comprasPred));
 
         return resultado;
     }
@@ -162,7 +179,7 @@ public class MotorPrediccionIA {
 
     // ── Backpropagation ───────────────────────────────────────────────────────
 
-    private void entrenarMuestra(double[] x, double[] yReal) {
+    private void entrenarMuestra(double[] x, double[] yReal, double tasaAprendizaje) {
         // — Forward —
         double[] netH1 = multiplicar(x,  w1, b1);
         double[] h1    = activarReLU(netH1);
@@ -197,23 +214,23 @@ public class MotorPrediccionIA {
         // — Actualizar W3 y b3 —
         for (int j = 0; j < HIDDEN2_SIZE; j++)
             for (int k = 0; k < OUTPUT_SIZE; k++)
-                w3[j][k] += TASA_APRENDIZAJE * deltaOut[k] * h2[j];
+                w3[j][k] += tasaAprendizaje * deltaOut[k] * h2[j];
         for (int k = 0; k < OUTPUT_SIZE; k++)
-            b3[k] += TASA_APRENDIZAJE * deltaOut[k];
+            b3[k] += tasaAprendizaje * deltaOut[k];
 
         // — Actualizar W2 y b2 —
         for (int j = 0; j < HIDDEN1_SIZE; j++)
             for (int k = 0; k < HIDDEN2_SIZE; k++)
-                w2[j][k] += TASA_APRENDIZAJE * deltaH2[k] * h1[j];
+                w2[j][k] += tasaAprendizaje * deltaH2[k] * h1[j];
         for (int k = 0; k < HIDDEN2_SIZE; k++)
-            b2[k] += TASA_APRENDIZAJE * deltaH2[k];
+            b2[k] += tasaAprendizaje * deltaH2[k];
 
         // — Actualizar W1 y b1 —
         for (int i = 0; i < INPUT_SIZE; i++)
             for (int k = 0; k < HIDDEN1_SIZE; k++)
-                w1[i][k] += TASA_APRENDIZAJE * deltaH1[k] * x[i];
+                w1[i][k] += tasaAprendizaje * deltaH1[k] * x[i];
         for (int k = 0; k < HIDDEN1_SIZE; k++)
-            b1[k] += TASA_APRENDIZAJE * deltaH1[k];
+            b1[k] += tasaAprendizaje * deltaH1[k];
     }
 
     // ── Cálculo de error MSE (diagnóstico) ───────────────────────────────────
@@ -267,9 +284,23 @@ public class MotorPrediccionIA {
         return "ESTABLE";
     }
 
-    private String calcularConfianza(int nMeses) {
-        if (nMeses >= 10) return "Alto";
-        if (nMeses >=  6) return "Medio";
+    private String calcularConfianza(int nMeses, double mseFinal) {
+        // Base según historial
+        int scoreMeses = 0;
+        if (nMeses >= 10) scoreMeses = 3;
+        else if (nMeses >= 6) scoreMeses = 2;
+        else scoreMeses = 1;
+
+        // Base según error cuadrático medio (normalizado)
+        int scoreMse = 0;
+        if (mseFinal < 0.05) scoreMse = 3;      // Excelente convergencia
+        else if (mseFinal < 0.15) scoreMse = 2; // Convergencia aceptable
+        else scoreMse = 1;                      // Pobre convergencia
+
+        int scoreTotal = scoreMeses + scoreMse;
+
+        if (scoreTotal >= 5) return "Alto";
+        if (scoreTotal >= 3) return "Medio";
         return "Bajo";
     }
 }

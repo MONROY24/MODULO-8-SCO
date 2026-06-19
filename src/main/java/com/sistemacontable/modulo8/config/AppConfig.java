@@ -3,6 +3,8 @@ package com.sistemacontable.modulo8.config;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * MÓDULO 8 – Análisis Predictivo con IA
@@ -15,6 +17,7 @@ import java.util.Properties;
  */
 public final class AppConfig {
 
+    private static final Logger LOGGER = Logger.getLogger(AppConfig.class.getName());
     private static final String CONFIG_FILE = "db.properties";
     private static final Properties props    = new Properties();
 
@@ -32,12 +35,11 @@ public final class AppConfig {
             if (is != null) {
                 props.load(is);
             } else {
-                System.err.println("[AppConfig] ADVERTENCIA: No se encontró '"
-                        + CONFIG_FILE + "' en el classpath. Usando valores por defecto.");
+                LOGGER.warning("No se encontró '" + CONFIG_FILE + "' en el classpath. Usando valores por defecto.");
                 cargarValoresPorDefecto();
             }
         } catch (IOException e) {
-            System.err.println("[AppConfig] Error al leer configuración: " + e.getMessage());
+            LOGGER.log(Level.SEVERE, "Error al leer configuración", e);
             cargarValoresPorDefecto();
         }
     }

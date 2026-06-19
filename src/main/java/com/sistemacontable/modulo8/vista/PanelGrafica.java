@@ -84,6 +84,17 @@ public class PanelGrafica extends JPanel {
         // — Cuadrícula y ejes —
         dibujarCuadricula(g, gw, gh, maxVal);
 
+        boolean multiYear = false;
+        if (!hist.isEmpty()) {
+            int firstYear = hist.get(0).getAnio();
+            for (RegistroFinanciero r : hist) {
+                if (r.getAnio() != firstYear) {
+                    multiYear = true;
+                    break;
+                }
+            }
+        }
+
         // — Barras históricas —
         for (int i = 0; i < hist.size(); i++) {
             RegistroFinanciero r  = hist.get(i);
@@ -101,6 +112,9 @@ public class PanelGrafica extends JPanel {
             g.setFont(F_SMALL);
             g.setColor(C_TEXTO);
             String mes = r.getNombreMes();
+            if (multiYear) {
+                mes += String.format(" '%02d", r.getAnio() % 100);
+            }
             FontMetrics fm = g.getFontMetrics();
             g.drawString(mes,
                     PAD_L + i * grupW + (grupW - fm.stringWidth(mes)) / 2,

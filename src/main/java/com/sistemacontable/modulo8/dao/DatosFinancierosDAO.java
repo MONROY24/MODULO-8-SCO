@@ -1,5 +1,6 @@
 package com.sistemacontable.modulo8.dao;
 
+import com.sistemacontable.modulo8.modelo.EmpresaItem;
 import com.sistemacontable.modulo8.modelo.RegistroFinanciero;
 
 import java.sql.*;
@@ -37,19 +38,25 @@ public class DatosFinancierosDAO {
     /*
     private static final String SQL_HISTORIAL_REAL =
         "SELECT " +
-        "    MONTH(v.fecha_emision) AS mes_numero, " +
-        "    YEAR(v.fecha_emision)  AS anio, " +
-        "    COALESCE(SUM(c.total_factura), 0) AS total_compras, " +
-        "    COALESCE(SUM(v.total_factura), 0) AS total_ventas " +
-        "FROM ventas_facturas v " +
-        "LEFT JOIN compras_facturas c " +
-        "    ON MONTH(v.fecha_emision) = MONTH(c.fecha_emision) " +
-        "   AND YEAR(v.fecha_emision)  = YEAR(c.fecha_emision) " +
-        "   AND v.id_empresa           = c.id_empresa " +
-        "WHERE v.id_empresa = ? " +
-        "  AND YEAR(v.fecha_emision) = 2025 " +
-        "GROUP BY MONTH(v.fecha_emision), YEAR(v.fecha_emision) " +
-        "ORDER BY anio ASC, mes_numero ASC";
+        "    v.mes_numero, " +
+        "    v.anio, " +
+        "    COALESCE(c.total_compras, 0) AS total_compras, " +
+        "    v.total_ventas " +
+        "FROM (" +
+        "    SELECT MONTH(fecha_emision) AS mes_numero, YEAR(fecha_emision) AS anio, SUM(total_factura) AS total_ventas " +
+        "    FROM ventas_facturas " +
+        "    WHERE id_empresa = ? AND YEAR(fecha_emision) = 2025 " +
+        "    GROUP BY YEAR(fecha_emision), MONTH(fecha_emision) " +
+        ") v " +
+        "LEFT JOIN (" +
+        "    SELECT MONTH(fecha_emision) AS mes_numero, YEAR(fecha_emision) AS anio, SUM(total_factura) AS total_compras " +
+        "    FROM compras_facturas " +
+        "    WHERE id_empresa = ? AND YEAR(fecha_emision) = 2025 " +
+        "    GROUP BY YEAR(fecha_emision), MONTH(fecha_emision) " +
+        ") c " +
+        "    ON v.mes_numero = c.mes_numero AND v.anio = c.anio " +
+        "ORDER BY v.anio ASC, v.mes_numero ASC";
+    // Nota al integrar: Esta consulta requiere setear el parámetro idEmpresa dos veces (ps.setInt(1, id); ps.setInt(2, id)).
     */
 
     // ── Dependencia ───────────────────────────────────────────────────────────
@@ -94,17 +101,17 @@ public class DatosFinancierosDAO {
      * Retorna el listado de todas las empresas disponibles.
      * @return Mapa ID → Nombre para poblar el selector de empresa en la UI.
      */
-    public List<String[]> obtenerEmpresas() throws SQLException {
-        List<String[]> empresas = new ArrayList<>();
+    public List<EmpresaItem> obtenerEmpresas() throws SQLException {
+        List<EmpresaItem> empresas = new ArrayList<>();
         Connection conn = conexionDB.getConexion();
 
         try (PreparedStatement ps = conn.prepareStatement(SQL_EMPRESAS_MOCK);
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
-                empresas.add(new String[]{
-                        String.valueOf(rs.getInt("id_empresa")),
+                empresas.add(new EmpresaItem(
+                        rs.getInt("id_empresa"),
                         rs.getString("nombre_comercial")
-                });
+                ));
             }
         }
         return empresas;

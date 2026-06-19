@@ -24,4 +24,5 @@ desktop.ini
 
 # ── Configuración local (¡nunca versionar credenciales!) ─────────────────────
 # Si quieres versionar config/, excluye solo el archivo de producción:
-# config/db.properties
+config/db.properties
+

@@ -1,6 +1,7 @@
 package com.sistemacontable.modulo8.controlador;
 
 import com.sistemacontable.modulo8.dao.DatosFinancierosDAO;
+import com.sistemacontable.modulo8.modelo.EmpresaItem;
 import com.sistemacontable.modulo8.modelo.RegistroFinanciero;
 import com.sistemacontable.modulo8.modelo.ResultadoPrediccion;
 import com.sistemacontable.modulo8.servicio.MotorPrediccionIA;
@@ -33,6 +34,9 @@ public class AnalisisControlador {
 
     // Estado del último análisis (para exportar sin recalcular)
     private ResultadoPrediccion ultimoResultado;
+    
+    // Referencia al worker activo para poder cancelarlo
+    private SwingWorker<ResultadoPrediccion, Void> workerAnalisis;
 
     // ── Constructor ───────────────────────────────────────────────────────────
 
@@ -51,7 +55,7 @@ public class AnalisisControlador {
      */
     public void cargarEmpresas() {
         try {
-            List<String[]> empresas = dao.obtenerEmpresas();
+            List<EmpresaItem> empresas = dao.obtenerEmpresas();
             vista.poblarSelectorEmpresas(empresas);
         } catch (SQLException e) {
             mostrarError("No se pudo conectar a la base de datos.\n" + e.getMessage());
@@ -65,10 +69,15 @@ public class AnalisisControlador {
      * @param idEmpresa ID de la empresa seleccionada en la Vista.
      */
     public void ejecutarAnalisis(int idEmpresa) {
+        // Cancelar el worker anterior si sigue corriendo
+        if (workerAnalisis != null && !workerAnalisis.isDone()) {
+            workerAnalisis.cancel(true);
+        }
+
         vista.setEstadoCargando(true);
         vista.limpiarResultados();
 
-        SwingWorker<ResultadoPrediccion, Void> worker = new SwingWorker<>() {
+        workerAnalisis = new SwingWorker<>() {
 
             @Override
             protected ResultadoPrediccion doInBackground() throws Exception {
@@ -107,7 +116,7 @@ public class AnalisisControlador {
             }
         };
 
-        worker.execute();
+        workerAnalisis.execute();
     }
 
     /**

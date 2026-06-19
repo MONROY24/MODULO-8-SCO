@@ -1,6 +1,7 @@
 package com.sistemacontable.modulo8.vista;
 
 import com.sistemacontable.modulo8.controlador.AnalisisControlador;
+import com.sistemacontable.modulo8.modelo.EmpresaItem;
 import com.sistemacontable.modulo8.modelo.RegistroFinanciero;
 import com.sistemacontable.modulo8.modelo.ResultadoPrediccion;
 
@@ -41,8 +42,7 @@ public class VentanaAnalisis extends JFrame {
     private AnalisisControlador controlador;
 
     // ── Componentes de control ────────────────────────────────────────────────
-    private JComboBox<String> cmbEmpresa;
-    private int[]             empresaIds;
+    private JComboBox<EmpresaItem> cmbEmpresa;
     private JButton           btnAnalizar;
     private JButton           btnExportarPDF;
     private JProgressBar      progressBar;
@@ -212,8 +212,9 @@ public class VentanaAnalisis extends JFrame {
         btnExportarPDF.setEnabled(false);
 
         btnAnalizar.addActionListener(e -> {
-            if (cmbEmpresa.getSelectedIndex() < 0 || empresaIds == null) return;
-            controlador.ejecutarAnalisis(empresaIds[cmbEmpresa.getSelectedIndex()]);
+            EmpresaItem seleccion = (EmpresaItem) cmbEmpresa.getSelectedItem();
+            if (seleccion == null) return;
+            controlador.ejecutarAnalisis(seleccion.getId());
         });
         btnExportarPDF.addActionListener(e -> controlador.exportarPDF());
 
@@ -398,12 +399,10 @@ public class VentanaAnalisis extends JFrame {
     // ── API para el Controlador ───────────────────────────────────────────────
 
     /** Puebla el selector de empresas. */
-    public void poblarSelectorEmpresas(List<String[]> empresas) {
+    public void poblarSelectorEmpresas(List<EmpresaItem> empresas) {
         cmbEmpresa.removeAllItems();
-        empresaIds = new int[empresas.size()];
-        for (int i = 0; i < empresas.size(); i++) {
-            empresaIds[i] = Integer.parseInt(empresas.get(i)[0]);
-            cmbEmpresa.addItem(empresas.get(i)[1]);
+        for (EmpresaItem emp : empresas) {
+            cmbEmpresa.addItem(emp);
         }
     }
 

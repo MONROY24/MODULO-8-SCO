@@ -1,0 +1,24 @@
+# ============================================================
+#  Módulo 8 – Configuración de Base de Datos
+#  Ejemplo de configuración. 
+#  Copia este archivo como "db.properties" y edita los valores.
+# ============================================================
+
+# -- Tipo de base de datos: mysql | mariadb | postgresql
+db.driver=org.mariadb.jdbc.Driver
+
+# -- URL de conexión
+# MySQL / MariaDB:
+db.url=jdbc:mariadb://localhost:3306/dbsco?useSSL=false&serverTimezone=UTC
+
+# PostgreSQL (descomenta y comenta las líneas anteriores):
+# db.driver=org.postgresql.Driver
+# db.url=jdbc:postgresql://localhost:5432/dbsco
+
+# -- Credenciales (Reemplazar con los datos de tu entorno local)
+db.user=TU_USUARIO_AQUI
+db.password=TU_PASSWORD_AQUI
+
+# -- Pool de conexión (opcional, futuro uso)
+db.pool.maxConnections=5
+db.pool.timeout=30000

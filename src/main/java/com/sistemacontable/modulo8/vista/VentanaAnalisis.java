@@ -40,6 +40,10 @@ public class VentanaAnalisis extends JFrame {
 
     // ── Controlador ───────────────────────────────────────────────────────────
     private AnalisisControlador controlador;
+    private List<EmpresaItem> empresasCache;
+    private ResultadoPrediccion resultadoActual;
+    private String temaActual = "Claro";
+    private JComboBox<String> cmbTema;
 
     // ── Componentes de control ────────────────────────────────────────────────
     private JComboBox<EmpresaItem> cmbEmpresa;
@@ -61,18 +65,18 @@ public class VentanaAnalisis extends JFrame {
     private JTable            tablaHistorial;
 
     // ── Paleta de colores ─────────────────────────────────────────────────────
-    private static final Color C_PRIMARIO   = new Color(30,   72, 156);
-    private static final Color C_SECUNDARIO = new Color(59,  130, 246);
-    private static final Color C_FONDO      = new Color(241, 245, 249);
-    private static final Color C_PANEL      = new Color(255, 255, 255);
-    private static final Color C_VERDE      = new Color(22,  163,  74);
-    private static final Color C_ROJO       = new Color(220,  38,  38);
-    private static final Color C_AMARILLO   = new Color(234, 179,   8);
-    private static final Color C_GRIS_TEXTO = new Color(100, 116, 139);
-    private static final Color C_BORDE      = new Color(226, 232, 240);
-    private static final Color C_BLANCO     = Color.WHITE;
-    private static final Color C_FILA_PAR   = new Color(248, 250, 252);
-    private static final Color C_FILA_IMPAR = Color.WHITE;
+    private static Color C_PRIMARIO   = new Color(30,   72, 156);
+    private static Color C_SECUNDARIO = new Color(59,  130, 246);
+    private static Color C_FONDO      = new Color(241, 245, 249);
+    private static Color C_PANEL      = new Color(255, 255, 255);
+    private static Color C_VERDE      = new Color(22,  163,  74);
+    private static Color C_ROJO       = new Color(220,  38,  38);
+    private static Color C_AMARILLO   = new Color(234, 179,   8);
+    private static Color C_GRIS_TEXTO = new Color(100, 116, 139);
+    private static Color C_BORDE      = new Color(226, 232, 240);
+    private static Color C_BLANCO     = Color.WHITE;
+    private static Color C_FILA_PAR   = new Color(248, 250, 252);
+    private static Color C_FILA_IMPAR = Color.WHITE;
 
     // ── Tipografía ────────────────────────────────────────────────────────────
     private static final Font F_TITULO    = new Font("SansSerif", Font.BOLD,  18);
@@ -197,7 +201,7 @@ public class VentanaAnalisis extends JFrame {
                 new EmptyBorder(18, 14, 16, 14)));
         panel.setPreferredSize(new Dimension(215, 0));
 
-        // Selector de empresa
+        // Selector de empresa y tema
         JLabel lblEmpresa = nuevaEtiqueta("Seleccionar Empresa:", F_LABEL, C_PRIMARIO);
 
         cmbEmpresa = new JComboBox<>();
@@ -205,6 +209,16 @@ public class VentanaAnalisis extends JFrame {
         cmbEmpresa.setAlignmentX(LEFT_ALIGNMENT);
         cmbEmpresa.setFont(F_NORMAL);
         cmbEmpresa.setBackground(C_BLANCO);
+        cmbEmpresa.setForeground(C_GRIS_TEXTO);
+
+        JLabel lblTema = nuevaEtiqueta("Tema Visual:", F_LABEL, C_PRIMARIO);
+        cmbTema = new JComboBox<>(new String[]{"Claro", "Oscuro Negro", "Oscuro Gris"});
+        cmbTema.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
+        cmbTema.setAlignmentX(LEFT_ALIGNMENT);
+        cmbTema.setFont(F_NORMAL);
+        cmbTema.setBackground(C_BLANCO);
+        cmbTema.setForeground(C_GRIS_TEXTO);
+        cmbTema.addActionListener(e -> cambiarTema(cmbTema.getSelectedItem().toString()));
 
         // Botones
         btnAnalizar    = crearBoton("▶  Ejecutar Análisis", C_PRIMARIO,   C_BLANCO);
@@ -258,6 +272,10 @@ public class VentanaAnalisis extends JFrame {
         panel.add(lblEmpresa);
         panel.add(Box.createVerticalStrut(5));
         panel.add(cmbEmpresa);
+        panel.add(Box.createVerticalStrut(10));
+        panel.add(lblTema);
+        panel.add(Box.createVerticalStrut(5));
+        panel.add(cmbTema);
         panel.add(Box.createVerticalStrut(10));
         panel.add(btnAnalizar);
         panel.add(Box.createVerticalStrut(6));
@@ -400,6 +418,7 @@ public class VentanaAnalisis extends JFrame {
 
     /** Puebla el selector de empresas. */
     public void poblarSelectorEmpresas(List<EmpresaItem> empresas) {
+        this.empresasCache = empresas;
         cmbEmpresa.removeAllItems();
         for (EmpresaItem emp : empresas) {
             cmbEmpresa.addItem(emp);
@@ -408,6 +427,7 @@ public class VentanaAnalisis extends JFrame {
 
     /** Muestra el resultado completo del análisis en la UI. */
     public void mostrarResultados(ResultadoPrediccion res) {
+        this.resultadoActual = res;
         // KPIs
         lblVentasPredichas .setText(String.format("$%,.2f", res.getVentasPredichas()));
         lblComprasPredichas.setText(String.format("$%,.2f", res.getComprasPredichas()));
@@ -461,6 +481,7 @@ public class VentanaAnalisis extends JFrame {
 
     /** Limpia todos los componentes de resultado. */
     public void limpiarResultados() {
+        this.resultadoActual = null;
         lblVentasPredichas .setText("—");
         lblComprasPredichas.setText("—");
         lblUtilidad        .setText("—");
@@ -478,6 +499,72 @@ public class VentanaAnalisis extends JFrame {
         progressBar .setVisible(cargando);
         btnAnalizar .setEnabled(!cargando);
         cmbEmpresa  .setEnabled(!cargando);
+        if (cmbTema != null) cmbTema.setEnabled(!cargando);
+    }
+
+    private void cambiarTema(String tema) {
+        if (tema.equals(temaActual)) return;
+        temaActual = tema;
+
+        if ("Claro".equals(tema)) {
+            C_FONDO      = new Color(241, 245, 249);
+            C_PANEL      = new Color(255, 255, 255);
+            C_GRIS_TEXTO = new Color(100, 116, 139);
+            C_BORDE      = new Color(226, 232, 240);
+            C_BLANCO     = Color.WHITE;
+            C_FILA_PAR   = new Color(248, 250, 252);
+            C_FILA_IMPAR = Color.WHITE;
+            C_PRIMARIO   = new Color(30,   72, 156);
+        } else if ("Oscuro Negro".equals(tema)) {
+            C_FONDO      = new Color(18, 18, 18);
+            C_PANEL      = new Color(30, 30, 30);
+            C_GRIS_TEXTO = new Color(200, 200, 200);
+            C_BORDE      = new Color(60, 60, 60);
+            C_BLANCO     = new Color(40, 40, 40);
+            C_FILA_PAR   = new Color(35, 35, 35);
+            C_FILA_IMPAR = new Color(30, 30, 30);
+            C_PRIMARIO   = new Color(70,  130, 210);
+        } else if ("Oscuro Gris".equals(tema)) {
+            C_FONDO      = new Color(45, 45, 48);
+            C_PANEL      = new Color(60, 60, 65);
+            C_GRIS_TEXTO = new Color(220, 220, 220);
+            C_BORDE      = new Color(90, 90, 95);
+            C_BLANCO     = new Color(70, 70, 75);
+            C_FILA_PAR   = new Color(65, 65, 70);
+            C_FILA_IMPAR = new Color(60, 60, 65);
+            C_PRIMARIO   = new Color(80,  140, 220);
+        }
+
+        PanelGrafica.cambiarTema(tema);
+
+        EmpresaItem selEmpresa = (EmpresaItem) cmbEmpresa.getSelectedItem();
+        boolean isCargando = progressBar.isVisible();
+
+        getContentPane().removeAll();
+        getContentPane().setBackground(C_FONDO);
+        construirUI();
+
+        if (empresasCache != null) {
+            cmbEmpresa.removeAllItems();
+            for (EmpresaItem emp : empresasCache) {
+                cmbEmpresa.addItem(emp);
+            }
+            if (selEmpresa != null) {
+                cmbEmpresa.setSelectedItem(selEmpresa);
+            }
+        }
+        
+        cmbTema.setSelectedItem(temaActual);
+        setEstadoCargando(isCargando);
+        
+        if (resultadoActual != null) {
+            mostrarResultados(resultadoActual);
+        } else {
+            limpiarResultados();
+        }
+
+        revalidate();
+        repaint();
     }
 
     // ── Helpers de UI ─────────────────────────────────────────────────────────

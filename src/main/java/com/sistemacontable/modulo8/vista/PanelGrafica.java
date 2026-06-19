@@ -30,10 +30,10 @@ public class PanelGrafica extends JPanel {
     private static final Color C_PRED        = new Color(250, 204,  21);   // ámbar
     private static final Color C_PRED_OSC    = new Color(234, 179,   8);
     private static final Color C_TENDENCIA   = new Color(239,  68,  68);   // rojo coral
-    private static final Color C_FONDO       = new Color(248, 250, 252);
-    private static final Color C_FONDO_PRED  = new Color(254, 252, 232, 100);
-    private static final Color C_GRID        = new Color(226, 232, 240);
-    private static final Color C_TEXTO       = new Color(71,  85, 105);
+    private static Color C_FONDO       = new Color(248, 250, 252);
+    private static Color C_FONDO_PRED  = new Color(254, 252, 232, 100);
+    private static Color C_GRID        = new Color(226, 232, 240);
+    private static Color C_TEXTO       = new Color(71,  85, 105);
 
     private static final Font F_SMALL  = new Font("SansSerif", Font.PLAIN,  10);
     private static final Font F_BOLD   = new Font("SansSerif", Font.BOLD,   11);
@@ -59,10 +59,30 @@ public class PanelGrafica extends JPanel {
         repaint();
     }
 
+    public static void cambiarTema(String tema) {
+        if ("Claro".equals(tema)) {
+            C_FONDO       = new Color(248, 250, 252);
+            C_FONDO_PRED  = new Color(254, 252, 232, 100);
+            C_GRID        = new Color(226, 232, 240);
+            C_TEXTO       = new Color(71,  85, 105);
+        } else if ("Oscuro Negro".equals(tema)) {
+            C_FONDO       = new Color(20, 20, 20);
+            C_FONDO_PRED  = new Color(50, 50, 20, 100);
+            C_GRID        = new Color(60, 60, 60);
+            C_TEXTO       = new Color(180, 180, 180);
+        } else if ("Oscuro Gris".equals(tema)) {
+            C_FONDO       = new Color(50, 50, 55);
+            C_FONDO_PRED  = new Color(60, 60, 30, 100);
+            C_GRID        = new Color(80, 80, 85);
+            C_TEXTO       = new Color(200, 200, 200);
+        }
+    }
+
     // ── Pintado principal ─────────────────────────────────────────────────────
 
     @Override
     protected void paintComponent(Graphics g0) {
+        setBackground(C_FONDO);
         super.paintComponent(g0);
         Graphics2D g = prepararGraphics(g0);
 

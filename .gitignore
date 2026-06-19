@@ -26,3 +26,9 @@ desktop.ini
 # Si quieres versionar config/, excluye solo el archivo de producción:
 config/db.properties
 
+documentacion_extendida.md
+documentacion.pdf
+documentacion.md
+documentacion_tecnica_sco.pdf
+generar_md.py
+generar_pdf.js

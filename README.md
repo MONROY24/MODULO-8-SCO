@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Módulo 8 – Análisis Predictivo con Inteligencia Artificial
 ### Sistema Contable Computarizado · Ciclo I-2026
 
@@ -234,3 +235,6 @@ Entrada (3)  →  Oculta 1 (8, ReLU)  →  Oculta 2 (4, ReLU)  →  Salida (2, S
 ---
 
 *Módulo 8 · Sistema Contable Computarizado · Ciclo I-2026*
+=======
+# MODULO-8-SCO
+>>>>>>> c5115b5ac6ebf1936e26f798fcabdce2af28ac4c

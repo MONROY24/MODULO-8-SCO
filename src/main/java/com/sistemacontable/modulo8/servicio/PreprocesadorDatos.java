@@ -41,9 +41,9 @@ public class PreprocesadorDatos {
         }
 
         minVentas  = Double.MAX_VALUE;
-        maxVentas  = Double.MIN_VALUE;
+        maxVentas  = -Double.MAX_VALUE;
         minCompras = Double.MAX_VALUE;
-        maxCompras = Double.MIN_VALUE;
+        maxCompras = -Double.MAX_VALUE;
 
         for (RegistroFinanciero r : historial) {
             if (r.getTotalVentas()  < minVentas)  minVentas  = r.getTotalVentas();

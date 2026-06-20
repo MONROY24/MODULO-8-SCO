@@ -1,3 +1,7 @@
+<div align="center">
+  <img src="UES.png" width="200" alt="Logo UES" />
+</div>
+
 # 🧠 Módulo 8: Análisis Predictivo con Inteligencia Artificial
 ### Sistema Contable Computarizado (SCO)
 **Universidad de El Salvador (UES) - Facultad Multidisciplinaria de Occidente**
@@ -96,3 +100,8 @@ Se ha liberado la Documentación ISO Arquitectónica original del módulo, que i
 
 ---
 *Desarrollado para la materia de Sistemas Contables.*
+
+<br>
+<div align="center">
+  <img src="MR24.png" width="150" alt="Logo MR24" />
+</div>

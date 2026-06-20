@@ -117,4 +117,103 @@ public class GeneradorGraficaPDF {
 
         return y + 20;
     }
+
+    public static int dibujarGraficaUtilidad(Graphics2D g, ResultadoPrediccion res, int y) {
+        List<RegistroFinanciero> hist = res.getHistorial();
+        int grafH = 130, grafW = CONTENT_W;
+        int grafX = MARGIN, grafY = y;
+
+        // Fondo
+        g.setColor(new Color(248, 250, 252));
+        g.fillRect(grafX, grafY, grafW, grafH);
+        g.setColor(C_LINEA);
+        g.drawRect(grafX, grafY, grafW, grafH);
+
+        double maxVal = 0;
+        double minVal = 0;
+        for (RegistroFinanciero r : hist) {
+            double util = r.getTotalVentas() - r.getTotalCompras();
+            if (util > maxVal) maxVal = util;
+            if (util < minVal) minVal = util;
+        }
+        double utilPred = res.getVentasPredichas() - res.getComprasPredichas();
+        if (utilPred > maxVal) maxVal = utilPred;
+        if (utilPred < minVal) minVal = utilPred;
+
+        maxVal = maxVal * 1.15;
+        minVal = minVal < 0 ? minVal * 1.15 : 0;
+        double range = Math.max(maxVal - minVal, 1);
+
+        int zeroY = grafY + grafH - (int) (grafH * (0 - minVal) / range);
+
+        // Cuadrícula (línea cero)
+        g.setColor(Color.LIGHT_GRAY);
+        g.drawLine(grafX + 30, zeroY, grafX + grafW, zeroY);
+
+        int n = hist.size() + 1;
+        int grupW = (grafW - 40) / n;
+
+        boolean multiYear = false;
+        if (!hist.isEmpty()) {
+            int firstYear = hist.get(0).getAnio();
+            for (RegistroFinanciero r : hist) {
+                if (r.getAnio() != firstYear) {
+                    multiYear = true;
+                    break;
+                }
+            }
+        }
+
+        int[] xPoints = new int[n];
+        int[] yPoints = new int[n];
+
+        for (int i = 0; i < hist.size(); i++) {
+            RegistroFinanciero r = hist.get(i);
+            double util = r.getTotalVentas() - r.getTotalCompras();
+            int pX = grafX + 35 + i * grupW + grupW / 2;
+            int pY = grafY + grafH - (int) (grafH * (util - minVal) / range);
+            xPoints[i] = pX;
+            yPoints[i] = pY;
+
+            g.setColor(C_GRIS);
+            g.setFont(new Font("SansSerif", Font.PLAIN, 8));
+            String mes = r.getNombreMes();
+            if (multiYear) mes += String.format(" '%02d", r.getAnio() % 100);
+            g.drawString(mes, pX - 10, grafY + grafH + 12);
+        }
+
+        // Predicción
+        int pX = grafX + 35 + hist.size() * grupW + grupW / 2;
+        int pY = grafY + grafH - (int) (grafH * (utilPred - minVal) / range);
+        xPoints[n - 1] = pX;
+        yPoints[n - 1] = pY;
+
+        // Banda de predicción sutil
+        g.setColor(new Color(254, 243, 199, 100));
+        g.fillRect(grafX + 35 + hist.size() * grupW, grafY, grupW, grafH);
+
+        g.setColor(C_GRIS);
+        g.setFont(new Font("SansSerif", Font.BOLD, 8));
+        g.drawString("Pred.", pX - 10, grafY + grafH + 12);
+
+        // Dibujar línea azul
+        g.setColor(new Color(59, 130, 246));
+        g.setStroke(new BasicStroke(2));
+        g.drawPolyline(xPoints, yPoints, n);
+
+        // Puntos y valores
+        for (int i = 0; i < n; i++) {
+            g.setColor(Color.WHITE);
+            g.fillOval(xPoints[i] - 3, yPoints[i] - 3, 6, 6);
+            g.setColor(new Color(59, 130, 246));
+            g.drawOval(xPoints[i] - 3, yPoints[i] - 3, 6, 6);
+
+            g.setFont(new Font("SansSerif", Font.PLAIN, 7));
+            double val = i < hist.size() ? (hist.get(i).getTotalVentas() - hist.get(i).getTotalCompras()) : utilPred;
+            g.drawString(String.format("$%.0f", val), xPoints[i] - 10, yPoints[i] - 8);
+        }
+        g.setStroke(new BasicStroke(1));
+
+        return grafY + grafH + 20;
+    }
 }

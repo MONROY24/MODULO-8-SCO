@@ -64,9 +64,15 @@ public class ExportadorPDF {
         Graphics2D    g   = PlantillaPDF.crearGraphics(img);
 
         int y = MARGIN + 10;
-        PlantillaPDF.dibujarTituloSeccion(g, "Análisis de Tendencia y Gráfica Histórica", y);
+        PlantillaPDF.dibujarTituloSeccion(g, "Evolución Histórica y Predicción (Compras vs Ventas)", y);
         y += 30;
         y  = GeneradorGraficaPDF.dibujarGrafica(g, res, y);
+        
+        y += 15;
+        PlantillaPDF.dibujarTituloSeccion(g, "Evolución de Utilidad Neta (Márgenes)", y);
+        y += 30;
+        y = GeneradorGraficaPDF.dibujarGraficaUtilidad(g, res, y);
+        
         y += 22;
              dibujarRecomendaciones(g, res, y);
              PlantillaPDF.dibujarPieDePagina(g, 2, 2, res);

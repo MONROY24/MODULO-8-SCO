@@ -10,7 +10,10 @@
     --danger: #DC2626;     /* C_ROJO */
     --warning: #EAB308;    /* C_AMARILLO */
     
-    /* Table specific for light */
+    /* Header & Table specific for light */
+    --header-bg: #1E489C;
+    --header-border: #EAB308;
+    --header-text: #FFFFFF;
     --th-bg: #F8FAFC;
     --tr-even: #F8FAFC;
     --tr-hover: #E2E8F0;
@@ -28,6 +31,9 @@
     --danger: #EF4444;
     --warning: #F59E0B;
     
+    --header-bg: #0F172A;
+    --header-border: #334155;
+    --header-text: #F8FAFC;
     --th-bg: #1E293B;
     --tr-even: rgba(255, 255, 255, 0.02);
     --tr-hover: rgba(255, 255, 255, 0.05);
@@ -45,6 +51,9 @@
     --danger: #EF4444;
     --warning: #F59E0B;
 
+    --header-bg: #111111;
+    --header-border: #333333;
+    --header-text: #F8FAFC;
     --th-bg: #000000;
     --tr-even: rgba(255, 255, 255, 0.03);
     --tr-hover: rgba(255, 255, 255, 0.08);
@@ -73,13 +82,14 @@ body {
 
 /* Header (Idéntico a Java) */
 .header {
-    background-color: var(--primary);
-    color: white;
+    background-color: var(--header-bg);
+    color: var(--header-text);
     padding: 15px 20px;
-    border-bottom: 4px solid var(--warning);
+    border-bottom: 4px solid var(--header-border);
     display: flex;
     justify-content: space-between;
     align-items: center;
+    transition: background-color 0.3s, color 0.3s, border-color 0.3s;
 }
 
 .header h1 {
@@ -128,7 +138,7 @@ body {
     overflow: hidden;
     padding: 15px;
     gap: 15px;
-    margin-bottom: 40px; /* Espacio para el footer */
+    margin-bottom: 60px; /* Espacio para el footer más alto */
 }
 
 /* Panel Izquierdo */
@@ -326,14 +336,14 @@ tbody tr:hover {
 .footer {
     background-color: var(--panel-bg);
     border-top: 1px solid var(--border);
-    padding: 8px 20px;
+    padding: 10px 20px;
     position: fixed;
     bottom: 0;
     width: 100%;
-    height: 40px;
     display: flex;
     align-items: center;
     z-index: 100;
+    transition: background-color 0.3s, border-color 0.3s;
 }
 
 .footer-content {
@@ -343,13 +353,18 @@ tbody tr:hover {
     width: 100%;
 }
 
-.footer span {
+.footer-text {
     font-size: 11px;
-    font-weight: 600;
     color: var(--text-muted);
+    line-height: 1.5;
+}
+
+.footer-text strong {
+    color: var(--primary);
+    font-size: 12px;
 }
 
 .footer-logo {
-    height: 24px;
+    height: 45px;
     object-fit: contain;
 }

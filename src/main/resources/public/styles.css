@@ -138,7 +138,7 @@ body {
     overflow: hidden;
     padding: 15px;
     gap: 15px;
-    margin-bottom: 60px; /* Espacio para el footer más alto */
+    margin-bottom: 70px; /* Espacio para el footer profesional */
 }
 
 /* Panel Izquierdo */
@@ -332,41 +332,74 @@ tbody tr:hover {
     background-color: var(--tr-hover);
 }
 
-/* Footer */
+/* Footer Profesional */
 .footer {
     background-color: var(--panel-bg);
     border-top: 1px solid var(--border);
-    padding: 10px 20px;
+    padding: 12px 30px;
     position: fixed;
     bottom: 0;
     width: 100%;
     display: flex;
+    justify-content: space-between;
     align-items: center;
     z-index: 100;
     transition: background-color 0.3s, border-color 0.3s;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
 }
 
-.footer-content {
+.footer-col {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
 }
 
-.footer-text {
+.footer-col.ues-info {
+    text-align: left;
+}
+
+.footer-col.project-info {
+    text-align: center;
+    border-left: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+    padding: 0 20px;
+}
+
+.footer-col.logo-col {
+    text-align: right;
+    align-items: flex-end;
+}
+
+.uni-name, .course {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
     font-size: 11px;
-    color: var(--text-muted);
-    line-height: 1.5;
+    letter-spacing: 0.5px;
+    color: var(--text-main);
 }
 
-.footer-text strong {
-    color: var(--primary);
-    font-size: 12px;
+.faculty, .career {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.dept, .copyright {
+    font-size: 10px;
+    font-weight: 400;
+    color: var(--text-muted);
+    opacity: 0.8;
 }
 
 .footer-logo {
-    height: 45px;
+    height: 38px;
     object-fit: contain;
+    transition: transform 0.3s ease;
+}
+
+.footer-logo:hover {
+    transform: scale(1.05);
 }
 
 /* Responsividad para Móviles y Tablets */
@@ -408,18 +441,24 @@ tbody tr:hover {
     }
 
     .footer {
-        padding: 15px 10px;
+        padding: 15px;
         position: relative; /* Quitar fixed en móvil para evitar tapar contenido */
         border-top: 1px solid var(--border);
+        flex-direction: column;
+        gap: 20px;
     }
 
-    .footer-content {
-        flex-direction: column;
-        text-align: center;
-        gap: 15px;
+    .footer-col {
+        align-items: center;
+        text-align: center !important;
+        border: none !important;
+        padding: 0 !important;
+        width: 100%;
     }
-    
-    .footer-text {
-        font-size: 10px;
+
+    .footer-col.project-info {
+        border-top: 1px solid var(--border) !important;
+        border-bottom: 1px solid var(--border) !important;
+        padding: 15px 0 !important;
     }
 }

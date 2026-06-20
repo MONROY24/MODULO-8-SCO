@@ -58,8 +58,20 @@ public final class AppConfig {
         return getEnvOrProp("DB_DRIVER", "db.driver");
     }
 
-    /** URL JDBC completa (ej: {@code jdbc:mysql://localhost:3306/dbsco}). */
+    /** URL JDBC completa construida con variables de Render (o la propiedad por defecto). */
     public static String getDbUrl() {
+        String host = System.getenv("DB_HOST");
+        String port = System.getenv("DB_PORT");
+        String name = System.getenv("DB_NAME");
+
+        // Si Render inyecta DB_HOST, construimos la URL dinámicamente como lo haría Spring
+        if (host != null && !host.isBlank()) {
+            String p = (port != null && !port.isBlank()) ? port : "3306";
+            String n = (name != null && !name.isBlank()) ? name : "dbsco";
+            return "jdbc:mariadb://" + host + ":" + p + "/" + n + "?useSSL=false&allowPublicKeyRetrieval=true";
+        }
+
+        // Fallback a variable de entorno completa o archivo properties local
         return getEnvOrProp("DB_URL", "db.url");
     }
 

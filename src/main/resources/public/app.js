@@ -17,6 +17,49 @@ document.addEventListener('DOMContentLoaded', () => {
     let chartInstance = null;
     let selectedEmpresaId = null;
 
+    // Theme Logic
+    const themeBtns = document.querySelectorAll('.theme-btn');
+    const rootEl = document.documentElement;
+    const currentTheme = localStorage.getItem('theme') || 'light';
+    
+    function setTheme(themeName) {
+        rootEl.setAttribute('data-theme', themeName);
+        localStorage.setItem('theme', themeName);
+        
+        themeBtns.forEach(b => b.classList.remove('active'));
+        const btn = document.querySelector(`.theme-btn[data-theme="${themeName}"]`);
+        if(btn) btn.classList.add('active');
+
+        updateChartTheme();
+    }
+
+    function updateChartTheme() {
+        const isDark = rootEl.getAttribute('data-theme') && rootEl.getAttribute('data-theme').startsWith('dark');
+        const color = isDark ? '#94A3B8' : '#64748B';
+        Chart.defaults.color = color;
+        
+        if (chartInstance) {
+            chartInstance.options.scales.x.ticks.color = color;
+            chartInstance.options.scales.y.ticks.color = color;
+            chartInstance.options.plugins.legend.labels.color = color;
+            
+            // Grid lines color
+            const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+            chartInstance.options.scales.x.grid.color = gridColor;
+            chartInstance.options.scales.y.grid.color = gridColor;
+            
+            chartInstance.update();
+        }
+    }
+
+    setTheme(currentTheme);
+
+    themeBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            setTheme(btn.getAttribute('data-theme'));
+        });
+    });
+
     // Load Companies
     fetch('/api/empresas')
         .then(response => {
@@ -132,8 +175,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const dataCompras = historial.map(h => h.totalCompras);
         dataCompras.push(comprasPred);
 
-        // Reset chart colors to light theme
-        Chart.defaults.color = '#64748B';
+        const isDark = rootEl.getAttribute('data-theme') && rootEl.getAttribute('data-theme').startsWith('dark');
+        const color = isDark ? '#94A3B8' : '#64748B';
+        const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+        
+        Chart.defaults.color = color;
 
         chartInstance = new Chart(ctx, {
             type: 'line',
@@ -166,15 +212,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { position: 'top', labels: { boxWidth: 12, font: { size: 10 } } }
+                    legend: { 
+                        position: 'top', 
+                        labels: { boxWidth: 12, font: { size: 10 }, color: color } 
+                    }
                 },
                 scales: {
                     y: {
                         beginAtZero: true,
-                        ticks: { font: { size: 10 }, callback: value => '$' + value.toLocaleString() }
+                        ticks: { font: { size: 10 }, callback: value => '$' + value.toLocaleString(), color: color },
+                        grid: { color: gridColor }
                     },
                     x: {
-                        ticks: { font: { size: 10 } }
+                        ticks: { font: { size: 10 }, color: color },
+                        grid: { color: gridColor }
                     }
                 }
             }

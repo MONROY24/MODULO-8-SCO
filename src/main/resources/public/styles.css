@@ -1,4 +1,4 @@
-:root {
+:root, [data-theme="light"] {
     --primary: #1E489C;    /* C_PRIMARIO */
     --secondary: #3B82F6;  /* C_SECUNDARIO */
     --bg-color: #F1F5F9;   /* C_FONDO */
@@ -9,13 +9,56 @@
     --success: #16A34A;    /* C_VERDE */
     --danger: #DC2626;     /* C_ROJO */
     --warning: #EAB308;    /* C_AMARILLO */
+    
+    /* Table specific for light */
+    --th-bg: #F8FAFC;
+    --tr-even: #F8FAFC;
+    --tr-hover: #E2E8F0;
+}
+
+[data-theme="dark-gray"] {
+    --primary: #3B82F6;
+    --secondary: #6366F1;
+    --bg-color: #1E293B;   /* Slate 800 */
+    --panel-bg: #0F172A;   /* Slate 900 */
+    --text-main: #F8FAFC;
+    --text-muted: #94A3B8;
+    --border: #334155;
+    --success: #22C55E;
+    --danger: #EF4444;
+    --warning: #F59E0B;
+    
+    --th-bg: #1E293B;
+    --tr-even: rgba(255, 255, 255, 0.02);
+    --tr-hover: rgba(255, 255, 255, 0.05);
+}
+
+[data-theme="dark-black"] {
+    --primary: #3B82F6;
+    --secondary: #6366F1;
+    --bg-color: #000000;
+    --panel-bg: #111111;
+    --text-main: #F8FAFC;
+    --text-muted: #94A3B8;
+    --border: #333333;
+    --success: #22C55E;
+    --danger: #EF4444;
+    --warning: #F59E0B;
+
+    --th-bg: #000000;
+    --tr-even: rgba(255, 255, 255, 0.03);
+    --tr-hover: rgba(255, 255, 255, 0.08);
 }
 
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Inter', "Segoe UI", Tahoma, sans-serif;
+}
+
+h1, h2, h3, .panel-title, .section-title, .kpi-value {
+    font-family: 'Montserrat', sans-serif;
 }
 
 body {
@@ -25,6 +68,7 @@ body {
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    transition: background-color 0.3s, color 0.3s;
 }
 
 /* Header (Idéntico a Java) */
@@ -39,14 +83,42 @@ body {
 }
 
 .header h1 {
-    font-size: 18px;
-    font-weight: bold;
+    font-size: 19px;
+    font-weight: 700;
     margin-bottom: 2px;
 }
 
 .header p {
-    font-size: 11px;
+    font-size: 12px;
+    font-weight: 500;
     opacity: 0.9;
+}
+
+.header-theme {
+    display: flex;
+    gap: 8px;
+}
+
+.theme-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    padding: 5px 12px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.theme-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.theme-btn.active {
+    background: var(--warning);
+    border-color: var(--warning);
+    color: #000;
 }
 
 /* Contenedor Principal */
@@ -56,6 +128,7 @@ body {
     overflow: hidden;
     padding: 15px;
     gap: 15px;
+    margin-bottom: 40px; /* Espacio para el footer */
 }
 
 /* Panel Izquierdo */
@@ -92,7 +165,9 @@ body {
     width: 100%;
     padding: 8px;
     font-size: 12px;
-    border: 1px solid #ccc;
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    border: 1px solid var(--border);
     border-radius: 3px;
     margin-bottom: 15px;
 }
@@ -224,9 +299,9 @@ table {
 }
 
 th {
-    background-color: #F8FAFC;
+    background-color: var(--th-bg);
     color: var(--text-muted);
-    font-weight: bold;
+    font-weight: 600;
     padding: 8px;
     text-align: left;
     position: sticky;
@@ -236,13 +311,45 @@ th {
 
 td {
     padding: 6px 8px;
-    border-bottom: 1px solid #F1F5F9;
+    border-bottom: 1px solid var(--border);
 }
 
 tbody tr:nth-child(even) {
-    background-color: #F8FAFC;
+    background-color: var(--tr-even);
 }
 
 tbody tr:hover {
-    background-color: #E2E8F0;
+    background-color: var(--tr-hover);
+}
+
+/* Footer */
+.footer {
+    background-color: var(--panel-bg);
+    border-top: 1px solid var(--border);
+    padding: 8px 20px;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    z-index: 100;
+}
+
+.footer-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.footer span {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.footer-logo {
+    height: 24px;
+    object-fit: contain;
 }

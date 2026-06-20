@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Módulo 8 - Análisis Predictivo IA</title>
+    <!-- Fuentes formales y llamativas: Montserrat para títulos, Inter para textos -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Montserrat:wght@500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -14,7 +18,9 @@
             <p>Sistema Contable Computarizado</p>
         </div>
         <div class="header-theme">
-            <!-- Theme selector if needed -->
+            <button class="theme-btn active" data-theme="light">Claro</button>
+            <button class="theme-btn" data-theme="dark-gray">Oscuro Gris</button>
+            <button class="theme-btn" data-theme="dark-black">Oscuro Negro</button>
         </div>
     </header>
 
@@ -105,6 +111,14 @@
             </div>
         </main>
     </div>
+
+    <!-- Footer con Logo -->
+    <footer class="footer">
+        <div class="footer-content">
+            <span>Desarrollado por MR24 - Todos los derechos reservados &copy; 2026</span>
+            <img src="MR24.png" alt="MR24 Logo" class="footer-logo">
+        </div>
+    </footer>
 
     <script src="app.js"></script>
 </body>

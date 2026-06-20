@@ -5,7 +5,6 @@ import com.sistemacontable.modulo8.modelo.ResultadoPrediccion;
 import java.awt.*;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;

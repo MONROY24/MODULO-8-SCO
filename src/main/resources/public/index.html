@@ -5,70 +5,106 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Módulo 8 - Análisis Predictivo IA</title>
     <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <div class="background-shapes">
-        <div class="shape shape-1"></div>
-        <div class="shape shape-2"></div>
-        <div class="shape shape-3"></div>
-    </div>
+    <header class="header">
+        <div class="header-content">
+            <h1>Módulo 8 – Análisis Predictivo con Inteligencia Artificial</h1>
+            <p>Sistema Contable Computarizado</p>
+        </div>
+        <div class="header-theme">
+            <!-- Theme selector if needed -->
+        </div>
+    </header>
 
-    <main class="container">
-        <header class="glass-header">
-            <h1>Análisis Predictivo <span class="highlight">IA</span></h1>
-            <p>Módulo 8 - Sistema Contable Computarizado</p>
-        </header>
+    <div class="main-container">
+        <!-- Panel Izquierdo: Controles -->
+        <aside class="left-panel">
+            <div class="panel-section">
+                <label class="section-title">CONTROL DE ANÁLISIS</label>
+                
+                <label for="empresaSelect" class="input-label">Seleccionar Empresa:</label>
+                <select id="empresaSelect" class="form-control">
+                    <option value="">Cargando empresas...</option>
+                </select>
 
-        <section class="controls glass-panel">
-            <div class="input-group">
-                <label for="empresaSelect">Seleccione la Empresa:</label>
-                <div class="select-wrapper">
-                    <select id="empresaSelect">
-                        <option value="">Cargando empresas...</option>
-                    </select>
-                </div>
-            </div>
-            <div class="action-buttons">
-                <button id="btnAnalizar" class="btn primary" disabled>
-                    <span class="btn-text">Ejecutar Análisis</span>
-                    <span class="loader hidden"></span>
+                <button id="btnAnalizar" class="btn btn-primary" disabled>
+                    <span class="btn-text">▶ Ejecutar Análisis IA</span>
                 </button>
-                <button id="btnExportar" class="btn secondary" disabled>
-                    Exportar PDF
+                <button id="btnExportar" class="btn btn-secondary" disabled>
+                    <span class="btn-text">📄 Exportar Reporte PDF</span>
                 </button>
             </div>
-        </section>
 
-        <section id="resultsSection" class="results hidden">
+            <div class="panel-section info-section">
+                <label class="section-title">INFO DEL MODELO</label>
+                <p><strong>Red Neuronal:</strong> Perceptrón Multicapa</p>
+                <p><strong>Capas:</strong> 3 → 8 → 4 → 2</p>
+                <p><strong>Activación:</strong> ReLU + Sigmoid</p>
+            </div>
+            
+            <div id="errorToast" class="error-msg hidden"></div>
+        </aside>
+
+        <!-- Panel Derecho: Resultados -->
+        <main class="right-panel">
+            <!-- KPIs -->
             <div class="kpi-grid">
-                <div class="kpi-card glass-panel">
-                    <h3>Ventas Proyectadas</h3>
+                <div class="kpi-card">
+                    <div class="kpi-label">VENTAS PROYECTADAS (PRÓX. MES)</div>
                     <div class="kpi-value" id="valVentas">$0.00</div>
-                    <div class="kpi-trend" id="trendVentas"></div>
                 </div>
-                <div class="kpi-card glass-panel">
-                    <h3>Compras Proyectadas</h3>
+                <div class="kpi-card">
+                    <div class="kpi-label">COMPRAS PROYECTADAS (PRÓX. MES)</div>
                     <div class="kpi-value" id="valCompras">$0.00</div>
                 </div>
-                <div class="kpi-card glass-panel">
-                    <h3>Utilidad Proyectada</h3>
+                <div class="kpi-card">
+                    <div class="kpi-label">UTILIDAD PROYECTADA</div>
                     <div class="kpi-value" id="valUtilidad">$0.00</div>
                 </div>
-                <div class="kpi-card glass-panel">
-                    <h3>Nivel de Confianza</h3>
-                    <div class="kpi-value conf-badge" id="valConfianza">-</div>
+                <div class="kpi-card">
+                    <div class="kpi-label">TENDENCIA VENTAS</div>
+                    <div class="kpi-value" id="valTendencia" style="font-size: 14px; margin-top: 5px;">-</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">CONFIANZA DEL MODELO</div>
+                    <div class="kpi-value" id="valConfianza" style="font-size: 14px; margin-top: 5px;">-</div>
                 </div>
             </div>
 
-            <div class="chart-container glass-panel">
-                <canvas id="predictionChart"></canvas>
+            <div class="content-split">
+                <!-- Gráfica -->
+                <div class="chart-container panel-box">
+                    <div class="panel-title">Gráfica de Tendencia</div>
+                    <div style="height: 250px;">
+                        <canvas id="predictionChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Tabla -->
+                <div class="table-container panel-box">
+                    <div class="panel-title">Historial Financiero Utilizado</div>
+                    <div class="table-wrapper">
+                        <table id="historialTable">
+                            <thead>
+                                <tr>
+                                    <th>Año</th>
+                                    <th>Mes</th>
+                                    <th>Ventas ($)</th>
+                                    <th>Compras ($)</th>
+                                    <th>Utilidad ($)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Llenado por JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
-        </section>
-        
-        <div id="errorToast" class="toast hidden"></div>
-    </main>
+        </main>
+    </div>
 
     <script src="app.js"></script>
 </body>

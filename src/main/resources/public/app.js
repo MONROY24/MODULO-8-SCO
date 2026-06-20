@@ -2,16 +2,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const empresaSelect = document.getElementById('empresaSelect');
     const btnAnalizar = document.getElementById('btnAnalizar');
     const btnExportar = document.getElementById('btnExportar');
-    const resultsSection = document.getElementById('resultsSection');
     const errorToast = document.getElementById('errorToast');
     
     // KPI Elements
     const valVentas = document.getElementById('valVentas');
-    const trendVentas = document.getElementById('trendVentas');
     const valCompras = document.getElementById('valCompras');
     const valUtilidad = document.getElementById('valUtilidad');
+    const valTendencia = document.getElementById('valTendencia');
     const valConfianza = document.getElementById('valConfianza');
     
+    // Table
+    const historialTable = document.getElementById('historialTable').querySelector('tbody');
+
     let chartInstance = null;
     let selectedEmpresaId = null;
 
@@ -22,7 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return response.json();
         })
         .then(empresas => {
-            empresaSelect.innerHTML = '<option value="">-- Seleccione una Empresa --</option>';
+            empresaSelect.innerHTML = '<option value="">-- Seleccione Empresa --</option>';
             empresas.forEach(emp => {
                 const option = document.createElement('option');
                 option.value = emp.id;
@@ -30,7 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 empresaSelect.appendChild(option);
             });
         })
-        .catch(err => showError("No se pudo conectar al servidor de BD. " + err.message));
+        .catch(err => showError("Error DB: Configure DB_URL en Render. " + err.message));
 
     // Handle Selection
     empresaSelect.addEventListener('change', (e) => {
@@ -43,7 +45,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Format Currency
     const formatMoney = (amount) => {
         return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
     };
@@ -52,8 +53,10 @@ document.addEventListener('DOMContentLoaded', () => {
     btnAnalizar.addEventListener('click', async () => {
         if (!selectedEmpresaId) return;
 
-        setLoading(true);
-        resultsSection.classList.add('hidden');
+        btnAnalizar.disabled = true;
+        const originalText = btnAnalizar.innerHTML;
+        btnAnalizar.innerHTML = '<span class="btn-text">⏳ Procesando IA...</span>';
+        errorToast.classList.add('hidden');
 
         try {
             const response = await fetch(`/api/analisis/${selectedEmpresaId}`);
@@ -65,11 +68,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await response.json();
             renderResults(data);
             btnExportar.disabled = false;
-            resultsSection.classList.remove('hidden');
         } catch (error) {
             showError(error.message);
         } finally {
-            setLoading(false);
+            btnAnalizar.innerHTML = originalText;
+            btnAnalizar.disabled = false;
         }
     });
 
@@ -84,22 +87,30 @@ document.addEventListener('DOMContentLoaded', () => {
         valVentas.textContent = formatMoney(data.ventasPredichas);
         valCompras.textContent = formatMoney(data.comprasPredichas);
         valUtilidad.textContent = formatMoney(data.utilidadProyectada);
-        
-        // Utilidad Color
         valUtilidad.style.color = data.utilidadProyectada >= 0 ? 'var(--success)' : 'var(--danger)';
 
-        // Trend
         const varPct = data.tendenciaPorcentaje.toFixed(2);
-        trendVentas.textContent = `${varPct > 0 ? '+' : ''}${varPct}% vs mes anterior`;
-        trendVentas.className = 'kpi-trend ' + (varPct > 0 ? 'trend-up' : (varPct < 0 ? 'trend-down' : 'trend-stable'));
+        valTendencia.textContent = `${varPct > 0 ? '+' : ''}${varPct}% (${data.clasificacionTendencia})`;
+        valTendencia.style.color = varPct > 0 ? 'var(--success)' : (varPct < 0 ? 'var(--danger)' : 'var(--text-main)');
 
-        // Confidence
         valConfianza.textContent = data.nivelConfianza;
-        let confClass = 'conf-badge ';
-        if (data.nivelConfianza === 'Alto') confClass += 'conf-high';
-        else if (data.nivelConfianza === 'Medio') confClass += 'conf-medium';
-        else confClass += 'conf-low';
-        valConfianza.className = confClass;
+
+        // Render Table
+        historialTable.innerHTML = '';
+        data.historial.forEach(h => {
+            const utilidad = h.totalVentas - h.totalCompras;
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${h.anio}</td>
+                <td>${h.mesNumero}</td>
+                <td>${formatMoney(h.totalVentas)}</td>
+                <td>${formatMoney(h.totalCompras)}</td>
+                <td style="color: ${utilidad >= 0 ? 'var(--success)' : 'var(--danger)'}; font-weight: bold;">
+                    ${formatMoney(utilidad)}
+                </td>
+            `;
+            historialTable.appendChild(tr);
+        });
 
         // Render Chart
         renderChart(data.historial, data.ventasPredichas, data.comprasPredichas);
@@ -112,8 +123,8 @@ document.addEventListener('DOMContentLoaded', () => {
             chartInstance.destroy();
         }
 
-        const labels = historial.map(h => `Mes ${h.mesAnio}`);
-        labels.push('PROYECCIÓN');
+        const labels = historial.map(h => `${h.anio}-${String(h.mesNumero).padStart(2, '0')}`);
+        labels.push('PROY.');
 
         const dataVentas = historial.map(h => h.totalVentas);
         dataVentas.push(ventasPred);
@@ -121,9 +132,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const dataCompras = historial.map(h => h.totalCompras);
         dataCompras.push(comprasPred);
 
-        // Chart.js defaults for dark mode
-        Chart.defaults.color = '#94a3b8';
-        Chart.defaults.borderColor = 'rgba(255,255,255,0.1)';
+        // Reset chart colors to light theme
+        Chart.defaults.color = '#64748B';
 
         chartInstance = new Chart(ctx, {
             type: 'line',
@@ -133,26 +143,22 @@ document.addEventListener('DOMContentLoaded', () => {
                     {
                         label: 'Ventas ($)',
                         data: dataVentas,
-                        borderColor: '#10b981',
-                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                        borderWidth: 3,
-                        pointBackgroundColor: '#10b981',
-                        pointBorderColor: '#fff',
-                        pointRadius: 5,
-                        fill: true,
-                        tension: 0.4
+                        borderColor: '#16A34A',
+                        backgroundColor: '#16A34A',
+                        borderWidth: 2,
+                        pointRadius: 4,
+                        fill: false,
+                        tension: 0.1
                     },
                     {
                         label: 'Compras ($)',
                         data: dataCompras,
-                        borderColor: '#ec4899',
-                        backgroundColor: 'rgba(236, 72, 153, 0.1)',
-                        borderWidth: 3,
-                        pointBackgroundColor: '#ec4899',
-                        pointBorderColor: '#fff',
-                        pointRadius: 5,
-                        fill: true,
-                        tension: 0.4
+                        borderColor: '#DC2626',
+                        backgroundColor: '#DC2626',
+                        borderWidth: 2,
+                        pointRadius: 4,
+                        fill: false,
+                        tension: 0.1
                     }
                 ]
             },
@@ -160,58 +166,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: {
-                        position: 'top',
-                        labels: { font: { family: 'Inter', size: 14 } }
-                    },
-                    tooltip: {
-                        mode: 'index',
-                        intersect: false,
-                        backgroundColor: 'rgba(15, 23, 42, 0.9)',
-                        titleFont: { size: 14 },
-                        bodyFont: { size: 13 },
-                        padding: 12,
-                        cornerRadius: 8
-                    }
+                    legend: { position: 'top', labels: { boxWidth: 12, font: { size: 10 } } }
                 },
                 scales: {
                     y: {
                         beginAtZero: true,
-                        grid: { drawBorder: false },
-                        ticks: {
-                            callback: function(value) {
-                                return '$' + value.toLocaleString();
-                            }
-                        }
+                        ticks: { font: { size: 10 }, callback: value => '$' + value.toLocaleString() }
                     },
                     x: {
-                        grid: { display: false }
+                        ticks: { font: { size: 10 } }
                     }
                 }
             }
         });
     }
 
-    function setLoading(isLoading) {
-        const textSpan = btnAnalizar.querySelector('.btn-text');
-        const loader = btnAnalizar.querySelector('.loader');
-        
-        if (isLoading) {
-            btnAnalizar.disabled = true;
-            textSpan.classList.add('hidden');
-            loader.classList.remove('hidden');
-        } else {
-            btnAnalizar.disabled = false;
-            textSpan.classList.remove('hidden');
-            loader.classList.add('hidden');
-        }
-    }
-
     function showError(msg) {
         errorToast.textContent = msg;
         errorToast.classList.remove('hidden');
-        setTimeout(() => {
-            errorToast.classList.add('hidden');
-        }, 5000);
+        setTimeout(() => errorToast.classList.add('hidden'), 6000);
     }
 });

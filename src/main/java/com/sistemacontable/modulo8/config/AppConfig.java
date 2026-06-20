@@ -58,9 +58,24 @@ public final class AppConfig {
         return getEnvOrProp("DB_DRIVER", "db.driver");
     }
 
-    /** URL JDBC completa (ej: {@code jdbc:mysql://localhost:3306/dbsco}). */
+    /** URL JDBC completa. Construida a partir de DB_HOST, DB_PORT, DB_NAME si DB_URL no existe. */
     public static String getDbUrl() {
-        return getEnvOrProp("DB_URL", "db.url");
+        String url = System.getenv("DB_URL");
+        if (url != null && !url.isBlank()) {
+            return url;
+        }
+        
+        String host = System.getenv("DB_HOST");
+        String port = System.getenv("DB_PORT");
+        String name = System.getenv("DB_NAME");
+        
+        if (host != null && !host.isBlank()) {
+            if (port == null || port.isBlank()) port = "3306";
+            if (name == null || name.isBlank()) name = "dbsco";
+            return "jdbc:mariadb://" + host + ":" + port + "/" + name + "?useSSL=false&serverTimezone=UTC";
+        }
+        
+        return props.getProperty("db.url", "");
     }
 
     /** Usuario de base de datos. */

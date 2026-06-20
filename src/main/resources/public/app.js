@@ -14,8 +14,29 @@ document.addEventListener('DOMContentLoaded', () => {
     // Table
     const historialTable = document.getElementById('historialTable').querySelector('tbody');
 
-    let chartInstance = null;
+    let chartLine = null;
+    let chartBar = null;
+    let chartDoughnut = null;
     let selectedEmpresaId = null;
+
+    // Splash Screen Logic
+    const splashScreen = document.getElementById('splash-screen');
+    const progressBar = document.getElementById('progress-bar');
+    const progressText = document.getElementById('progress-text');
+    let progress = 0;
+    const loadingInterval = setInterval(() => {
+        progress += Math.floor(Math.random() * 15) + 10; 
+        if (progress > 100) progress = 100;
+        if(progressBar) progressBar.style.width = `${progress}%`;
+        if(progressText) progressText.textContent = `${progress}%`;
+        if (progress === 100) {
+            clearInterval(loadingInterval);
+            setTimeout(() => {
+                if(splashScreen) splashScreen.style.opacity = '0';
+                setTimeout(() => { if(splashScreen) splashScreen.style.display = 'none'; }, 500);
+            }, 300);
+        }
+    }, 150);
 
     // Theme Logic
     const themeBtns = document.querySelectorAll('.theme-btn');
@@ -38,18 +59,22 @@ document.addEventListener('DOMContentLoaded', () => {
         const color = isDark ? '#94A3B8' : '#64748B';
         Chart.defaults.color = color;
         
-        if (chartInstance) {
-            chartInstance.options.scales.x.ticks.color = color;
-            chartInstance.options.scales.y.ticks.color = color;
-            chartInstance.options.plugins.legend.labels.color = color;
-            
-            // Grid lines color
-            const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
-            chartInstance.options.scales.x.grid.color = gridColor;
-            chartInstance.options.scales.y.grid.color = gridColor;
-            
-            chartInstance.update();
-        }
+        const charts = [chartLine, chartBar, chartDoughnut];
+        charts.forEach(chart => {
+            if (chart) {
+                if (chart.options.scales && chart.options.scales.x) {
+                    chart.options.scales.x.ticks.color = color;
+                    chart.options.scales.y.ticks.color = color;
+                    const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+                    chart.options.scales.x.grid.color = gridColor;
+                    chart.options.scales.y.grid.color = gridColor;
+                }
+                if (chart.options.plugins && chart.options.plugins.legend) {
+                    chart.options.plugins.legend.labels.color = color;
+                }
+                chart.update();
+            }
+        });
     }
 
     setTheme(currentTheme);
@@ -160,11 +185,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderChart(historial, ventasPred, comprasPred) {
-        const ctx = document.getElementById('predictionChart').getContext('2d');
-        
-        if (chartInstance) {
-            chartInstance.destroy();
-        }
+        if (chartLine) chartLine.destroy();
+        if (chartBar) chartBar.destroy();
+        if (chartDoughnut) chartDoughnut.destroy();
+
+        const isDark = rootEl.getAttribute('data-theme') && rootEl.getAttribute('data-theme').startsWith('dark');
+        const color = isDark ? '#94A3B8' : '#64748B';
+        const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+        Chart.defaults.color = color;
 
         const labels = historial.map(h => `${h.anio}-${String(h.mesNumero).padStart(2, '0')}`);
         labels.push('PROY.');
@@ -175,58 +203,77 @@ document.addEventListener('DOMContentLoaded', () => {
         const dataCompras = historial.map(h => h.totalCompras);
         dataCompras.push(comprasPred);
 
-        const isDark = rootEl.getAttribute('data-theme') && rootEl.getAttribute('data-theme').startsWith('dark');
-        const color = isDark ? '#94A3B8' : '#64748B';
-        const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
-        
-        Chart.defaults.color = color;
+        const chartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'top', labels: { boxWidth: 12, font: { size: 10 }, color: color } }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { font: { size: 10 }, callback: value => '$' + value.toLocaleString(), color: color },
+                    grid: { color: gridColor }
+                },
+                x: {
+                    ticks: { font: { size: 10 }, color: color },
+                    grid: { color: gridColor }
+                }
+            }
+        };
 
-        chartInstance = new Chart(ctx, {
+        // Gráfico de Líneas (Tendencia)
+        const ctxLine = document.getElementById('chartLine').getContext('2d');
+        chartLine = new Chart(ctxLine, {
             type: 'line',
             data: {
                 labels: labels,
                 datasets: [
-                    {
-                        label: 'Ventas ($)',
-                        data: dataVentas,
-                        borderColor: '#16A34A',
-                        backgroundColor: '#16A34A',
-                        borderWidth: 2,
-                        pointRadius: 4,
-                        fill: false,
-                        tension: 0.1
-                    },
-                    {
-                        label: 'Compras ($)',
-                        data: dataCompras,
-                        borderColor: '#DC2626',
-                        backgroundColor: '#DC2626',
-                        borderWidth: 2,
-                        pointRadius: 4,
-                        fill: false,
-                        tension: 0.1
-                    }
+                    { label: 'Ventas ($)', data: dataVentas, borderColor: '#16A34A', backgroundColor: '#16A34A', borderWidth: 2, pointRadius: 4, fill: false, tension: 0.1 },
+                    { label: 'Compras ($)', data: dataCompras, borderColor: '#DC2626', backgroundColor: '#DC2626', borderWidth: 2, pointRadius: 4, fill: false, tension: 0.1 }
                 ]
+            },
+            options: chartOptions
+        });
+
+        // Calcular históricos sin predicción para barras y donas
+        const histVentas = historial.map(h => h.totalVentas).reduce((a, b) => a + b, 0);
+        const histCompras = historial.map(h => h.totalCompras).reduce((a, b) => a + b, 0);
+
+        // Gráfico de Barras
+        const ctxBar = document.getElementById('chartBar').getContext('2d');
+        chartBar = new Chart(ctxBar, {
+            type: 'bar',
+            data: {
+                labels: ['Ventas Totales', 'Compras Totales'],
+                datasets: [{
+                    label: 'Monto Acumulado ($)',
+                    data: [histVentas, histCompras],
+                    backgroundColor: ['#16A34A', '#DC2626'],
+                    borderRadius: 4
+                }]
+            },
+            options: chartOptions
+        });
+
+        // Gráfico de Dona
+        const ctxDoughnut = document.getElementById('chartDoughnut').getContext('2d');
+        chartDoughnut = new Chart(ctxDoughnut, {
+            type: 'doughnut',
+            data: {
+                labels: ['Ingresos (Ventas)', 'Egresos (Compras)'],
+                datasets: [{
+                    data: [histVentas, histCompras],
+                    backgroundColor: ['#16A34A', '#DC2626'],
+                    hoverOffset: 4,
+                    borderWidth: 0
+                }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { 
-                        position: 'top', 
-                        labels: { boxWidth: 12, font: { size: 10 }, color: color } 
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: { font: { size: 10 }, callback: value => '$' + value.toLocaleString(), color: color },
-                        grid: { color: gridColor }
-                    },
-                    x: {
-                        ticks: { font: { size: 10 }, color: color },
-                        grid: { color: gridColor }
-                    }
+                    legend: { position: 'right', labels: { boxWidth: 12, font: { size: 10 }, color: color } }
                 }
             }
         });

@@ -12,6 +12,20 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
+
+    <!-- Pantalla de Carga (Splash Screen) -->
+    <div id="splash-screen">
+        <div class="splash-content">
+            <img src="UES.png" alt="UES Logo" class="splash-logo">
+            <h2 class="splash-title">Sistema Contable Computarizado</h2>
+            <p class="splash-subtitle">Inicializando Módulo de Inteligencia Artificial...</p>
+            <div class="progress-bar-container">
+                <div id="progress-bar" class="progress-bar"></div>
+            </div>
+            <p id="progress-text" class="progress-text">0%</p>
+        </div>
+    </div>
+
     <header class="header">
         <div class="header-content">
             <h1>Módulo 8 – Análisis Predictivo con Inteligencia Artificial</h1>
@@ -80,13 +94,27 @@
             </div>
 
             <div class="content-split">
-                <!-- Gráfica -->
-                <div class="chart-container panel-box">
-                    <div class="panel-title">Gráfica de Tendencia</div>
-                    <div style="height: 250px;">
-                        <canvas id="predictionChart"></canvas>
+                <!-- Dashboard Grid de Gráficas -->
+            <div class="charts-grid">
+                <div class="panel-box chart-container main-chart">
+                    <span class="panel-title">Evolución Histórica y Predicción (IA)</span>
+                    <div style="flex: 1; position: relative;">
+                        <canvas id="chartLine"></canvas>
                     </div>
                 </div>
+                <div class="panel-box chart-container">
+                    <span class="panel-title">Comparativa de Totales</span>
+                    <div style="flex: 1; position: relative;">
+                        <canvas id="chartBar"></canvas>
+                    </div>
+                </div>
+                <div class="panel-box chart-container">
+                    <span class="panel-title">Distribución Ingresos/Egresos</span>
+                    <div style="flex: 1; position: relative;">
+                        <canvas id="chartDoughnut"></canvas>
+                    </div>
+                </div>
+            </div>
 
                 <!-- Tabla -->
                 <div class="table-container panel-box">
@@ -114,10 +142,13 @@
 
     <!-- Footer Profesional Institucional -->
     <footer class="footer">
-        <div class="footer-col ues-info">
-            <span class="uni-name">UNIVERSIDAD DE EL SALVADOR (UES)</span>
-            <span class="faculty">Facultad Multidisciplinaria de Occidente</span>
-            <span class="dept">Depto. de Ingeniería y Arquitectura</span>
+        <div class="footer-col ues-info" style="flex-direction: row; align-items: center; gap: 15px;">
+            <img src="UES.png" alt="UES Logo" class="footer-logo">
+            <div style="display: flex; flex-direction: column;">
+                <span class="uni-name">UNIVERSIDAD DE EL SALVADOR (UES)</span>
+                <span class="faculty">Facultad Multidisciplinaria de Occidente</span>
+                <span class="dept">Depto. de Ingeniería y Arquitectura</span>
+            </div>
         </div>
         <div class="footer-col project-info">
             <span class="course">SISTEMAS CONTABLES</span>

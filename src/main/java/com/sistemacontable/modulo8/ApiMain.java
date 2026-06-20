@@ -3,6 +3,10 @@ package com.sistemacontable.modulo8;
 import com.sistemacontable.modulo8.controlador.AnalisisRestController;
 import io.javalin.Javalin;
 import io.javalin.http.staticfiles.Location;
+import io.javalin.json.JavalinJackson;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,7 +21,12 @@ public class ApiMain {
             port = Integer.parseInt(envPort);
         }
 
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
         Javalin app = Javalin.create(config -> {
+            config.jsonMapper(new JavalinJackson(mapper));
             // Configurar Javalin para servir los archivos estáticos desde src/main/resources/public
             config.staticFiles.add("/public", Location.CLASSPATH);
             

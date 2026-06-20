@@ -135,10 +135,11 @@ body {
 .main-container {
     display: flex;
     flex: 1;
-    overflow: hidden;
+    overflow-y: auto; /* Allow scrolling inside the container if needed */
+    overflow-x: hidden;
     padding: 15px;
     gap: 15px;
-    margin-bottom: 70px; /* Espacio para el footer profesional */
+    margin-bottom: 0; /* Ya no hay margin porque el footer es relativo */
 }
 
 /* Panel Izquierdo */
@@ -240,7 +241,8 @@ body {
     display: flex;
     flex-direction: column;
     gap: 15px;
-    overflow-y: auto;
+    /* El scroll debe permitirse para poder ver todo el contenido hacia abajo */
+    overflow-y: visible;
 }
 
 /* KPIs */
@@ -290,15 +292,12 @@ body {
 .charts-grid .chart-container {
     display: flex;
     flex-direction: column;
+    min-height: 280px; /* Aumentado para evitar solapamiento del doughnut chart */
 }
 
 .charts-grid .main-chart {
     grid-column: span 2;
-    height: 240px;
-}
-
-.charts-grid .chart-container:not(.main-chart) {
-    height: 180px;
+    min-height: 280px;
 }
 
 .panel-box {
@@ -357,16 +356,16 @@ tbody tr:hover {
 .footer {
     background-color: var(--panel-bg);
     border-top: 1px solid var(--border);
-    padding: 12px 30px;
-    position: fixed;
-    bottom: 0;
+    padding: 15px 30px;
+    position: relative; /* Eliminado el fixed, fluye con la página */
     width: 100%;
     display: flex;
     justify-content: space-between;
     align-items: center;
     z-index: 100;
     transition: background-color 0.3s, border-color 0.3s;
-    box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+    box-shadow: 0 -4px 12px rgba(0,0,0,0.03);
+    margin-top: auto; /* Empuja el footer al final de la página si es corta */
 }
 
 .footer-col {
@@ -470,9 +469,7 @@ tbody tr:hover {
     }
 
     .footer {
-        padding: 15px;
-        position: relative; /* Quitar fixed en móvil para evitar tapar contenido */
-        border-top: 1px solid var(--border);
+        padding: 20px 15px;
         flex-direction: column;
         gap: 20px;
     }

@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const historialTable = document.getElementById('historialTable').querySelector('tbody');
 
     let chartLine = null;
+    let chartArea = null;
     let chartBar = null;
     let chartDoughnut = null;
     let selectedEmpresaId = null;
@@ -59,7 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const color = isDark ? '#94A3B8' : '#64748B';
         Chart.defaults.color = color;
         
-        const charts = [chartLine, chartBar, chartDoughnut];
+        const charts = [chartLine, chartArea, chartBar, chartDoughnut];
         charts.forEach(chart => {
             if (chart) {
                 if (chart.options.scales && chart.options.scales.x) {
@@ -186,6 +187,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderChart(historial, ventasPred, comprasPred) {
         if (chartLine) chartLine.destroy();
+        if (chartArea) chartArea.destroy();
         if (chartBar) chartBar.destroy();
         if (chartDoughnut) chartDoughnut.destroy();
 
@@ -231,6 +233,29 @@ document.addEventListener('DOMContentLoaded', () => {
                 datasets: [
                     { label: 'Ventas ($)', data: dataVentas, borderColor: '#16A34A', backgroundColor: '#16A34A', borderWidth: 2, pointRadius: 4, fill: false, tension: 0.1 },
                     { label: 'Compras ($)', data: dataCompras, borderColor: '#DC2626', backgroundColor: '#DC2626', borderWidth: 2, pointRadius: 4, fill: false, tension: 0.1 }
+                ]
+            },
+            options: chartOptions
+        });
+
+        // Gráfico de Área (Utilidad Neta)
+        const dataUtilidad = dataVentas.map((v, i) => v - dataCompras[i]);
+        const ctxArea = document.getElementById('chartArea').getContext('2d');
+        chartArea = new Chart(ctxArea, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Utilidad Neta ($)',
+                        data: dataUtilidad,
+                        borderColor: '#3B82F6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.3)',
+                        borderWidth: 2,
+                        pointRadius: 4,
+                        fill: true,
+                        tension: 0.2
+                    }
                 ]
             },
             options: chartOptions

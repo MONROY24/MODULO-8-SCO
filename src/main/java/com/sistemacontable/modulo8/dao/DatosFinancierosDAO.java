@@ -77,9 +77,9 @@ public class DatosFinancierosDAO {
      */
     public List<RegistroFinanciero> obtenerHistorial(int idEmpresa) throws SQLException {
         List<RegistroFinanciero> lista = new ArrayList<>();
-        Connection conn = conexionDB.getConexion();
 
-        try (PreparedStatement ps = conn.prepareStatement(SQL_HISTORIAL_MOCK)) {
+        try (Connection conn = conexionDB.getConexion();
+             PreparedStatement ps = conn.prepareStatement(SQL_HISTORIAL_MOCK)) {
             ps.setInt(1, idEmpresa);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -103,9 +103,9 @@ public class DatosFinancierosDAO {
      */
     public List<EmpresaItem> obtenerEmpresas() throws SQLException {
         List<EmpresaItem> empresas = new ArrayList<>();
-        Connection conn = conexionDB.getConexion();
 
-        try (PreparedStatement ps = conn.prepareStatement(SQL_EMPRESAS_MOCK);
+        try (Connection conn = conexionDB.getConexion();
+             PreparedStatement ps = conn.prepareStatement(SQL_EMPRESAS_MOCK);
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 empresas.add(new EmpresaItem(
@@ -123,8 +123,8 @@ public class DatosFinancierosDAO {
      * @return Nombre comercial o "Empresa desconocida" si no existe.
      */
     public String obtenerNombreEmpresa(int idEmpresa) throws SQLException {
-        Connection conn = conexionDB.getConexion();
-        try (PreparedStatement ps = conn.prepareStatement(SQL_NOMBRE_EMPRESA_MOCK)) {
+        try (Connection conn = conexionDB.getConexion();
+             PreparedStatement ps = conn.prepareStatement(SQL_NOMBRE_EMPRESA_MOCK)) {
             ps.setInt(1, idEmpresa);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {

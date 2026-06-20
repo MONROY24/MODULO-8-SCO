@@ -26,7 +26,7 @@ public class ApiMain {
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
         Javalin app = Javalin.create(config -> {
-            config.jsonMapper(new JavalinJackson(mapper));
+            config.jsonMapper(new JavalinJackson(mapper, false));
             // Configurar Javalin para servir los archivos estáticos desde src/main/resources/public
             config.staticFiles.add("/public", Location.CLASSPATH);
             

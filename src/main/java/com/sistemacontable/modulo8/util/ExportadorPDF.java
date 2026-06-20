@@ -24,16 +24,17 @@ import static com.sistemacontable.modulo8.util.PlantillaPDF.*;
 public class ExportadorPDF {
 
     /**
-     * Genera el PDF del análisis y lo guarda en la ruta indicada.
+     * Genera el PDF del análisis y lo retorna como arreglo de bytes.
      *
-     * @param resultado   Resultado del análisis predictivo.
-     * @param rutaArchivo Ruta completa del PDF a crear.
-     * @throws IOException si hay error de escritura en disco.
+     * @param resultado Resultado del análisis predictivo.
+     * @return Arreglo de bytes del PDF.
+     * @throws IOException si hay un error al generar.
      */
-    public void generarPDF(ResultadoPrediccion resultado, String rutaArchivo) throws IOException {
+    public byte[] generarPDF(ResultadoPrediccion resultado) throws IOException {
         List<BufferedImage> paginas = renderizarPaginas(resultado);
-        try (FileOutputStream fos = new FileOutputStream(rutaArchivo)) {
-            PlantillaPDF.escribirPDF(fos, paginas);
+        try (java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream()) {
+            PlantillaPDF.escribirPDF(baos, paginas);
+            return baos.toByteArray();
         }
     }
 

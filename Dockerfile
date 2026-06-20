@@ -1,36 +1,29 @@
-# --- Fase 1: Compilar la aplicación ---
-FROM eclipse-temurin:17-jdk-focal AS build
+# --- Fase 1: Compilar la aplicación (Maven) ---
+FROM maven:3.9.6-eclipse-temurin-17 AS build
 
-# Instalar Apache Ant (ya que el proyecto no usa Maven)
-RUN apt-get update && apt-get install -y ant
-
-# Copiar el código y compilar usando build.xml
-WORKDIR /src
-COPY . .
-RUN ant jar
-
-# --- Fase 2: Ejecutar la aplicación (con visor web VNC) ---
-# Como es una app de escritorio (Swing) y Render no tiene pantalla,
-# usamos esta imagen que permite ver la ventana desde el navegador web.
-FROM jlesage/baseimage-gui:alpine-3.18-v4.6
-
-# Instalar Java 17 JRE
-RUN apk add --no-cache openjdk17-jre
-
-# Copiar el JAR generado en la fase de construcción
+# Copiar el POM y descargar dependencias
 WORKDIR /app
-COPY --from=build /src/build/modulo8-ia.jar app.jar
+COPY pom.xml .
+RUN mvn dependency:go-offline
 
-# Configuración de la interfaz gráfica web
-ENV APP_NAME="Modulo 8 IA - Analisis Predictivo"
-ENV DISPLAY_WIDTH=1150
-ENV DISPLAY_HEIGHT=800
+# Copiar el código fuente y compilar
+COPY src ./src
+COPY config ./config
+RUN mvn clean package
 
-# Configurar el puerto web. Usamos el puerto 10000 que expondremos en Render.
-ENV WEB_PORT=10000
-EXPOSE 10000
+# --- Fase 2: Ejecutar la API REST ---
+FROM eclipse-temurin:17-jre-alpine
 
-# Script de inicio requerido por la imagen base para arrancar tu app
-RUN echo "#!/bin/sh" > /startapp.sh && \
-    echo "exec java -jar /app/app.jar" >> /startapp.sh && \
-    chmod +x /startapp.sh
+WORKDIR /app
+# Copiar el Fat JAR de la fase de construcción
+COPY --from=build /app/target/modulo8-ia-jar-with-dependencies.jar /app/modulo8-ia.jar
+
+# Copiar configuración (si es requerida en tiempo de ejecución, asumiendo db.properties)
+# Render inyectará las variables de entorno, pero si la app lee config/db.properties local:
+COPY config ./config
+
+# Exponer el puerto por defecto de Javalin/Render
+EXPOSE 8080
+
+# Comando de inicio
+CMD ["java", "-jar", "modulo8-ia.jar"]

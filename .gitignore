@@ -32,3 +32,7 @@ documentacion.md
 documentacion_tecnica_sco.pdf
 generar_md.py
 generar_pdf.js
+
+# ── Node ──────────────────────────────────────────────────────────────────────
+node_modules/
+package-lock.json

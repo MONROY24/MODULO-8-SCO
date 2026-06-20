@@ -368,3 +368,58 @@ tbody tr:hover {
     height: 45px;
     object-fit: contain;
 }
+
+/* Responsividad para Móviles y Tablets */
+@media (max-width: 768px) {
+    body {
+        height: auto;
+        overflow-y: auto; /* Permitir scroll en la página entera */
+    }
+
+    .header {
+        flex-direction: column;
+        text-align: center;
+        gap: 10px;
+        padding: 15px 10px;
+    }
+
+    .main-container {
+        flex-direction: column;
+        overflow: visible;
+        margin-bottom: 120px; /* Mayor margen para footer apilado */
+    }
+
+    .left-panel {
+        width: 100%;
+        gap: 10px;
+        box-shadow: none;
+    }
+
+    .right-panel {
+        overflow-y: visible;
+    }
+
+    .kpi-grid {
+        flex-wrap: wrap;
+    }
+
+    .kpi-card {
+        min-width: 45%; /* Dos tarjetas por fila */
+    }
+
+    .footer {
+        padding: 15px 10px;
+        position: relative; /* Quitar fixed en móvil para evitar tapar contenido */
+        border-top: 1px solid var(--border);
+    }
+
+    .footer-content {
+        flex-direction: column;
+        text-align: center;
+        gap: 15px;
+    }
+    
+    .footer-text {
+        font-size: 10px;
+    }
+}

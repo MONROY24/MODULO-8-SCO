@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Theme Logic
     const themeBtns = document.querySelectorAll('.theme-btn');
     const rootEl = document.documentElement;
-    const currentTheme = localStorage.getItem('theme') || 'light';
+    const currentTheme = localStorage.getItem('theme') || 'dark-gray';
     
     function setTheme(themeName) {
         rootEl.setAttribute('data-theme', themeName);

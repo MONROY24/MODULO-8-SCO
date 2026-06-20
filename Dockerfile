@@ -16,7 +16,7 @@ FROM eclipse-temurin:17-jre-alpine
 
 WORKDIR /app
 # Copiar el Fat JAR de la fase de construcción
-COPY --from=build /app/target/modulo8-ia-jar-with-dependencies.jar /app/modulo8-ia.jar
+COPY --from=build /app/target/modulo8-ia.jar /app/modulo8-ia.jar
 
 # Copiar configuración (si es requerida en tiempo de ejecución, asumiendo db.properties)
 # Render inyectará las variables de entorno, pero si la app lee config/db.properties local:
